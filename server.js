@@ -4,14 +4,14 @@ const app = express()
 app.use(express.urlencoded({ extended: true }));
 // parse incoming JSON data
 app.use(express.json());
+
+app.use(express.static('public'));//this helps us serve all our assets without having to create routes for each one
 const PORT = process.env.PORT || 3001;
 const { animals } = require("./data/animals.json");
 const fs = require('fs');
 const path = require('path');
 
-app.listen(PORT, () =>{
-    console.log(`API server now on port ${PORT}`)
-});
+
 
 function filterByQuery(query, animalsArray) {
   let personalityTraitsArray = [];
@@ -85,6 +85,7 @@ function createNewAnimal(body, animalsArray) {
   return body;
 }
 
+//get request using query such as /api/animals?name=Erica or /api/animals?name=Erica&name=Mike(query array)
 app.get('/api/animals', (req, res) => {
   let results = animals;
   if (req.query) {
@@ -93,6 +94,7 @@ app.get('/api/animals', (req, res) => {
   res.json(results);
 });
 
+//get request using parameters such as /api/animals/2
 app.get('/api/animals/:id', (req, res) => {
   const result = findById(req.params.id, animals);
   if (result) {
@@ -114,5 +116,21 @@ app.post('/api/animals', (req, res) => {
     const animal = createNewAnimal(req.body, animals);
     res.json(animal);
   }
- });
+});
 
+//route to serve index.html. '/' points to the root of the server. res.sendFile is used to serve the html file
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, './public/index.html'));
+});
+
+app.get('/animals', (req, res) => {
+  res.sendFile(path.join(__dirname, './public/animals.html'));
+});
+
+app.get('/zookeepers', (req, res) => {
+  res.sendFile(path.join(__dirname, './public/zookeepers.html'));
+});
+
+app.listen(PORT, () => {
+  console.log(`API server now on port ${PORT}`)
+});
